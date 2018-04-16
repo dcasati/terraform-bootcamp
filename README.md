@@ -3,6 +3,8 @@
 
 This tutorial walks you through the deplyment of a VM with Terraform on Microsoft Azure.
 
+![diagram](images/diagram.png)
+
 ## Target Audience
 
 The target audience for this tutorial is someone that is looking for a hands-on introduction on Terraform.
