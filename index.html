@@ -1,0 +1,746 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <meta charset="utf-8" />
+    <meta name="keywords" content="terraform, devops, azure" />
+    <meta name="description" content="DevOps in Practice: Deploying Infrastructure as Code with Terraform on Azure." />
+    <title>DevOps in Practice: Deploying Infrastructure as Code with Terraform on Azure.</title>
+    <style>
+      @import url(https://fonts.googleapis.com/css?family=Droid+Serif);
+      @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
+      @import url(https://fonts.googleapis.com/css?family=Ubuntu+Mono:400,700,400italic);
+
+      body {
+        font-family: 'Droid Serif';
+      }
+      h1, h2, h3 {
+        font-family: 'Yanone Kaffeesatz';
+        font-weight: 400;
+        margin-bottom: 0;
+      }
+      .remark-slide-content h1 { font-size: 3em; }
+      .remark-slide-content h2 { font-size: 2em; }
+      .remark-slide-content h3 { font-size: 1.6em; }
+      .footnote {
+        position: absolute;
+        bottom: 3em;
+      }
+      li p { line-height: 1.25em; }
+      .red { color: #fa0000; }
+      .white {color: #e7e8e2;}
+      .large { font-size: 2em; }
+      a, a > code {
+        color: rgb(249, 38, 114);
+        text-decoration: none;
+      }
+      code {
+        background: #e7e8e2;
+        border-radius: 5px;
+      }
+      .remark-code, .remark-inline-code { font-family: 'Ubuntu Mono'; }
+      .remark-code-line-highlighted     { background-color: #373832; }
+      .pull-left {
+        float: left;
+        width: 47%;
+      }
+      .pull-right {
+        float: right;
+        width: 47%;
+      }
+      .pull-right ~ p {
+        clear: both;
+      }
+      #slideshow .slide .content code {
+        font-size: 0.8em;
+      }
+      #slideshow .slide .content pre code {
+        font-size: 0.9em;
+        padding: 15px;
+      }
+      .inverse {
+        background: #272822;
+        color: #777872;
+        text-shadow: 0 0 20px #333;
+      }
+      .inverse h1, .inverse h2 {
+        color: #f3f3f3;
+        line-height: 0.8em;
+      }
+
+      /* Slide-specific styling */
+      #slide-inverse .footnote {
+        bottom: 12px;
+        left: 20px;
+      }
+      #slide-how .slides {
+        font-size: 0.9em;
+        position: absolute;
+        top:  151px;
+        right: 140px;
+      }
+      #slide-how .slides h3 {
+        margin-top: 0.2em;
+      }
+      #slide-how .slides .first, #slide-how .slides .second {
+        padding: 1px 20px;
+        height: 90px;
+        width: 120px;
+        -moz-box-shadow: 0 0 10px #777;
+        -webkit-box-shadow: 0 0 10px #777;
+        box-shadow: 0 0 10px #777;
+      }
+      #slide-how .slides .first {
+        background: #fff;
+        position: absolute;
+        top: 20%;
+        left: 20%;
+        z-index: 1;
+      }
+      #slide-how .slides .second {
+        position: relative;
+        background: #fff;
+        z-index: 0;
+      }
+
+      /* Two-column layout */
+      .left-column {
+        color: #777;
+        width: 20%;
+        height: 92%;
+        float: left;
+      }
+        .left-column h2:last-of-type, .left-column h3:last-child {
+          color: #000;
+        }
+      .right-column {
+        width: 75%;
+        float: right;
+        padding-top: 1em;
+      }
+    </style>
+  </head>
+  <body>
+    <textarea id="source">
+name: inverse
+layout: true
+class: center, middle, inverse
+---
+#DevOps in Practice: 
+## Deploying Infrastructure as Code with Terraform on Azure
+
+
+[Diego Casati - Senior Software Engineer - Microsoft]
+---
+layout: false
+.left-column[
+  ## First things first
+]
+.right-column[
+
+Requirements for this workshop:
+
+- an Azure Subscription
+
+tools: 
+
+- `git`, 
+- an editor (vs `code`, `vi`, `emacs`, `nano`), 
+- `az` - azure cli.
+- `ssh`
+ 
+or the cloud shell at [https://shell.azure.com](https://shell.azure.com)
+
+Before we proceed, please do this now:
+
+1. Clone this repo:
+  ```bash
+  git clone https://github.com/dcasati/terraform-bootcamp.git
+  ```
+2. If you are using VS Code, install the Terraform extension:
+
+![vs-terraform|20%](images/vs-terraform.png)
+  
+]
+---
+template:inverse
+
+## What is Infrastructure as Code anyway - aka IaC?
+---
+layout: false
+.left-column[
+  ## What is it?
+]
+.right-column[
+
+In a nutshell - 
+
+> "This allows a blueprint of your datacenter to be versioned and treated as
+> you would any other code. Additionally, infrastructure can be shared and re-used."
+>
+> -- <cite>www.terraform.io/intro</cite>
+
+![Infrastructure as Code](images/iac-book.jpg)
+
+]
+---
+.left-column[
+  ## What is it?
+  ## Why use it?
+]
+.right-column[
+
+> "The goal of DevOps is to make software delivery more efficient.""
+>
+> -- <cite>Yevgeniy Brikman on Terraform Up and Running</cite>
+
+<br/>
+Infrastructure as Code: 
+
+- **SPEEDS** up the deployment of new infrastructure
+
+- **ALLOWS** you to version control your infrastructure, making it easy to perform roll-backs
+
+- **ENABLES** a repeatable model for deploying your infrastructure, reducing the "fat-finger-effect"
+
+]
+---
+.left-column[
+  ## What is it?
+  ## Why use it?
+  ## Trade-offs
+]
+.right-column[
+Using Infrastructure as Code brings some important considerations: 
+
+- How to provide file isolation, file locking and safeguard the state of the infrastructure managed by Terraform? 
+
+- Declarative vs Imperative.
+]
+---
+
+.left-column[
+  ## What is it?
+  ## Why use it?
+  ## Trade-offs
+]
+.right-column[
+
+The good: 
+
+  - Its clear, concise, reproducible method are a plus. 
+  
+The bad: 
+
+  - The drawback to have in mind is this: when not careful, a commit can break your entire infrastructure. 
+  
+The ugly: 
+
+  - This could be your production.red[*] and staging environment.
+
+  .footnote[.red[*] Version control and file isolation can mitigate most of these issues.]
+]
+---
+template: inverse
+
+## Terraform
+---
+name: how
+
+.left-column[
+  ## What is Terraform ?
+]
+.right-column[
+Terraform is a tool for building, changing, and versioning infrastructure safely and efficiently. Terraform can manage existing and popular 
+service providers as well as custom in-house solutions.
+
+Configuration files describe to Terraform the components needed to run a single application or your entire datacenter. 
+Terraform generates an execution plan describing what it will do to reach the desired state, and then executes it to build the 
+described infrastructure. As the configuration changes, Terraform is able to determine what changed and create incremental execution 
+plans which can be applied.
+
+The infrastructure Terraform can manage includes low-level components such as compute instances, storage, and networking, as well 
+as high-level components such as DNS entries, SaaS features, etc.
+
+
+More on the [Terraform website](http://www.terraform.io).
+]
+---
+.left-column[
+  ## What is Terraform ?
+  ### - Installing Terraform
+]
+.right-column[
+Terraform is distributed as a binary package for various OSes, including: Linux, MacOS, OpenBSD, FreeBSD, Windows and Solaris.
+
+download the binary at: [https://www.terraform.io/downloads.html](https://www.terraform.io/downloads.html)
+
+Another option is to use the Cloud Shell on Azure at [https://shell.azure.com](https://shell.azure.com)
+]
+
+---
+.left-column[
+  ## What is Terraform ?
+  ### - Installing Terraform
+  ### - Verifying the Installation
+]
+.right-column[
+
+Run the following command on a terminal: `terraform`. You should see an output similar to this:
+
+```bash
+$ terraform
+Usage: terraform [--version] [--help] <command> [args]
+
+The available commands for execution are listed below.
+The most common, useful commands are shown first, followed by
+less common or more advanced commands. If you're just getting
+started with Terraform, stick with the common commands. For the
+other commands, please read the help and docs before usage.
+
+Common commands:
+    apply              Builds or changes infrastructure
+    console            Interactive console for Terraform interpolations
+    destroy            Destroy Terraform-managed infrastructure
+    env                Workspace management
+    fmt                Rewrites config files to canonical format
+    get                Download and install modules for the configuration
+    graph              Create a visual graph of Terraform resources
+    import             Import existing infrastructure into Terraform
+    init               Initialize a Terraform working directory
+    output             Read an output from a state file
+    plan               Generate and show an execution plan
+    providers          Prints a tree of the providers used in the configuration
+    push               Upload this Terraform module to Atlas to run
+    refresh            Update local state file against real resources
+    show               Inspect Terraform state or plan
+```
+
+]
+---
+.left-column[
+  ## What is Terraform ?
+  ### - Installing Terraform
+  ### - Verifying the Installation
+  ### - Setting up access to Azure
+]
+.right-column[
+Terraform uses an Azure AD service principal to provision resources on Azure. Here we have two options:
+
+1. Manually setup the service principal as described [here](https://docs.microsoft.com/en-us/azure/virtual-machines/linux/terraform-install-configure#set-up-terraform-access-to-azure)
+1. Use the [setup_terraform.sh](https://github.com/dcasati/terraform-bootcamp/blob/master/tools/setup_terraform.sh) found under the `tools/` directory. 
+]
+---
+.left-column[
+  ## What is Terraform ?
+  ### - Installing Terraform
+  ### - Verifying the Installation
+  ### - Setting up access to Azure
+]
+.right-column[
+
+1. If not done already, log into Azure
+   ```bash
+   $ az login
+   ```
+1. Next, select a SUBSCRIPTION
+   ```bash
+   $ az account list -o table
+   ```
+1. The output should look similar to this
+
+<pre><code>
+  Name                                CloudName    SubscriptionId  State    IsDefault
+  ----------------------------------  -----------  --------------  -------  ---------
+  Microsoft Azure Sponsorship         AzureCloud   XXXXXXXX-XXXX.  Enabled  
+  Visual Studio Enterprise            AzureCloud   XXXXXXXX-XXXX.  Enabled  True
+</code></pre>
+]
+---
+.left-column[
+  ## What is Terraform ?
+  ### - Installing Terraform
+  ### - Verifying the Installation
+  ### - Setting up access to Azure
+]
+.right-column[
+Execute the `setup_terraform.sh` script:
+
+  ```bash
+  $ cd tools/
+  $ chmod +x setup_terraform.sh
+  $ SUBSCRIPTION=XXXXXXXXXX
+  $ ./setup_terraform.sh -s $SUBSCRIPTION
+  ```
+
+  OUTPUT
+  ```bash
+  Setting up the subscription
+  ----------------------------------------------------------
+  $ az account set --subscription=XXXXXXXXXXXXX
+  Retrying role assignment creation: 1/36
+  Setting environment variables for Terraform
+  ----------------------------------------------------------
+  $ source terraform.rc
+  Here are the Terraform environment variables for your setup
+  ----------------------------------------------------------
+  export ARM_SUBSCRIPTION_ID="XXXXXXXXX"
+  export ARM_CLIENT_ID="XXXXXXXXX"
+  export ARM_CLIENT_SECRET="XXXXXXXX"
+  export ARM_TENANT_ID="XXXXXXX"
+  ----------------------------------------------------------
+  Setup is done. Your Terraform variables were saved on the terraform.rc file.
+  ```
+]
+---
+template: inverse
+
+# Ready ? Let's try this !
+---
+.left-column[
+  ## Running a sample script
+  ### - init
+  ### - plan
+  ### - apply
+  ### - destroy
+]
+.right-column[
+
+1. Create a test file with the following information.red[*]:
+  ```bash
+  provider "azurerm" {
+  }
+  resource "azurerm_resource_group" "rg" {
+          name = "testResourceGroup"
+          location = "westus"
+  }
+  ```
+  
+1. then run `terraform init` to bootstrap Terraform.
+
+1. verify what will be created with `terraform plan`
+
+1. create the infrastructure with `terraform apply`
+
+1. clean up with `terraform destroy`
+
+.footnote[.red[*] Or use the file under the `labs` directory]
+
+]
+---
+template: inverse
+
+# Let's see that in action
+---
+.left-column[
+  ## Running a sample script
+  ### - init
+]
+.right-column[
+  
+Run `terraform init` to bootstrap Terraform.
+
+  ```bash
+  $ terraform init
+
+  Initializing provider plugins...
+  - Checking for available provider plugins on https://releases.hashicorp.com...
+  - Downloading plugin for provider "azurerm" (1.3.2)...
+
+  The following providers do not have any version constraints in configuration,
+  so the latest version was installed.
+
+  To prevent automatic upgrades to new major versions that may contain breaking
+  changes, it is recommended to add version = "..." constraints to the
+  corresponding provider blocks in configuration, with the constraint strings
+  suggested below.
+
+  * provider.azurerm: version = "~> 1.3"
+
+  Terraform has been successfully initialized!
+
+  You may now begin working with Terraform. Try running "terraform plan" to see
+  any changes that are required for your infrastructure. All Terraform commands
+  should now work.
+
+  If you ever set or change modules or backend configuration for Terraform,
+  rerun this command to reinitialize your working directory. If you forget, other
+  commands will detect it and remind you to do so if necessary.
+  ```
+]
+---
+.left-column[
+  ## Running a sample script
+  ### - init
+  ### - plan
+]
+.right-column[
+
+Verify what will be created with `terraform plan`
+
+<pre><code>
+  $ terraform plan
+  Refreshing Terraform state in-memory prior to plan...
+  The refreshed state will be used to calculate this plan, but will not be
+  persisted to local or remote state storage.
+  ------------------------------------------------------------------------
+  
+  An execution plan has been generated and is shown below.
+  Resource actions are indicated with the following symbols:
+    + create
+  
+  Terraform will perform the following actions:
+  
+    + azurerm_resource_group.rg
+        id:       <computed>
+        location: "westus"
+        name:     "testResourceGroup"
+        tags.%:   <computed>
+  
+  
+  Plan: 1 to add, 0 to change, 0 to destroy.
+  ------------------------------------------------------------------------
+
+  Note: You didn't specify an "-out" parameter to save this plan, so Terraform
+  can't guarantee that exactly these actions will be performed if
+  "terraform apply" is subsequently run.
+</code></pre>
+]
+---
+.left-column[
+  ## Running a sample script
+  ### - init
+  ### - plan
+  ### - apply
+]
+.right-column[
+Create the infrastructure with `terraform apply`
+<pre><code>
+  $ terraform apply
+  An execution plan has been generated and is shown below.
+  Resource actions are indicated with the following symbols:
+    + create
+
+  Terraform will perform the following actions:
+    + azurerm_resource_group.rg
+        id:       <computed>
+        location: "westus"
+        name:     "testResourceGroup"
+        tags.%:   <computed>
+
+  Plan: 1 to add, 0 to change, 0 to destroy.
+
+  Do you want to perform these actions?
+    Terraform will perform the actions described above.
+    Only 'yes' will be accepted to approve.
+
+    Enter a value: yes
+
+  azurerm_resource_group.rg: Creating...
+    location: "" => "westus"
+    name:     "" => "testResourceGroup"
+    tags.%:   "" => "<computed>"
+  azurerm_resource_group.rg: Creation complete after 2s
+
+  Apply complete! Resources: 1 added, 0 changed, 0 destroyed.
+</code></pre>
+]
+---
+.left-column[
+  ## Running a sample script
+  ### - init
+  ### - plan
+  ### - apply
+  ### - destroy
+]
+.right-column[
+Finally clean up with `terraform destroy`
+<pre><code>
+  $ terraform destroy
+  azurerm_resource_group.rg: Refreshing state...
+  
+  An execution plan has been generated and is shown below.
+  Resource actions are indicated with the following symbols:
+    - destroy
+  
+  Terraform will perform the following actions:
+  
+    - azurerm_resource_group.rg
+  
+  
+  Plan: 0 to add, 0 to change, 1 to destroy.
+  
+  Do you really want to destroy?
+    Terraform will destroy all your managed infrastructure, as shown above.
+    There is no undo. Only 'yes' will be accepted to confirm.
+  
+    Enter a value: yes
+  
+  azurerm_resource_group.rg: Destroying...
+  azurerm_resource_group.rg: Destruction complete after 47s
+  
+  Destroy complete! Resources: 1 destroyed.
+</code></pre>
+]
+---
+template: inverse
+
+# Next: Let's create something more interesting
+---
+.left-column[
+  ## Bootcamp infra
+]
+.right-column[
+
+![Our architecture](images/diagram.png)
+]
+---
+.left-column[
+  ## Bootcamp infra
+  ### - Core files
+]
+.right-column[
+Reference files are under: `labs/bootcamp/`
+
+| File         | Comment       |
+|:------------- |:------------- |
+| main.tf      | This is our core file. All of the definitions are here |
+| outputs.tf   | Defines the output from `terraform show` |
+| variables.tf | Defines the variables and default values used on `main.tf` |
+| common.tfvars| User defined values for the variables.red[*] |
+
+We will also run a few commands after the VM is up and running as defined on the file
+`tools/addons.sh`.
+
+```bash
+#!/bin/bash
+
+apt-get update \
+    && DEBIAN_FRONTEND=noninteractive apt-get install -y lynx
+
+apt-get install cowsay && cowsay "Howdy Azure Bootcamp!" > /tmp/cowsay.txt
+```
+
+.footnote[.red[*] You will be editing this file.]
+
+]
+---
+.left-column[
+  ## Bootcamp infra
+  ### - Core files
+  ### - Default values
+]
+.right-column[
+
+The following table shows our default values:
+
+| Parameter | Default Value |
+| :- | :- |
+| vm_size | Standard A0 |
+| location | East US |
+| Admin user.red[*] | azureuser |
+| VNet | 10.0.0.0/16 |
+| Management Subnet | 10.0.1.0/24 |
+
+
+.footnote[.red[*] Admin user will connect with ssh using public and private key pair]
+]
+---
+.left-column[
+  ## Bootcamp infra
+  ### - Core files
+  ### - Default values
+]
+.right-column[
+## What resources are we creating ? 
+
+- azurerm_resource_group
+- azurerm_virtual_network
+- azurerm_subnet
+- azurerm_network_security_group
+- azurerm_network_interface
+- azurerm_public_ip
+- azurerm_storage_account
+- azurerm_managed_disk
+- azurerm_virtual_machine
+- azurerm_virtual_machine_extension
+
+]
+
+---
+.left-column[
+  ## Bootcamp infra
+  ### - Core files
+  ### - Default values
+  ### - Show time!
+]
+.right-column[
+
+## Deploying the bootcamp VM
+
+1. `terraform init`
+1. `terraform plan -var-file=common.tfvars -out bootcamp-infra`
+1. `terraform apply "bootcamp-infra"`
+1. Connect to the vm: `terraform show`
+
+```bash
+ssh azureuser@<publicIp>
+```
+
+## Cleaning up
+
+1. `terraform destroy -var-file=common.tfvars`
+
+Say .red[yes] when you see this prompt:
+
+<pre><code>
+  Do you really want to destroy?
+  Terraform will destroy all your managed infrastructure, as shown above.
+  There is no undo. Only 'yes' will be accepted to confirm.
+
+  Enter a value: .red[yes]
+</code></pre>
+
+]
+---
+template: inverse
+
+## Next Steps
+---
+.left-column[
+ ## Next Steps
+]
+.right-column[
+
+- Terraform Examples on Azure [https://github.com/hashicorp/terraform/tree/master/examples](https://github.com/hashicorp/terraform/tree/master/examples)
+
+- Terraform Resources on Azure: [https://www.terraform.io/docs/providers/azurerm/index.html](https://www.terraform.io/docs/providers/azurerm/index.html)
+
+- Terraform Up and Running - Awesome book on Terraform !
+
+]
+---
+name: last-page
+template: inverse
+
+## Thank You !
+
+![QR](images/twitter-qr.png)
+
+### .white[twitter: diegocasati]
+### https://github.com/dcasati/terraform-bootcamp/
+
+    </textarea>
+    <script src="remark-latest.min.js"></script>
+    <script>
+      var hljs = remark.highlighter.engine;
+    </script>
+    <script>
+      var slideshow = remark.create({
+          highlightStyle: 'agate',
+          highlightLanguage: 'remark',
+          highlightLines: true,
+          ratio: '16:9'
+        }) ;
+    </script>
+  </body>
+</html>
