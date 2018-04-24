@@ -5,6 +5,12 @@
 #  tenant_id       = "REPLACE-WITH-YOUR-TENANT-ID"
 #}
 
+# randomize some things
+resource "random_integer" "random_int" {
+    min = 100
+    max = 999
+}
+
 # ************************** Terraform Bootcamp **************************** #
 resource "azurerm_resource_group" "rg" {
   name     = "${var.resource_group}"
@@ -77,7 +83,7 @@ resource "azurerm_public_ip" "pip" {
   location                     = "${var.location}"
   resource_group_name          = "${azurerm_resource_group.rg.name}"
   public_ip_address_allocation = "Dynamic"
-  domain_name_label            = "${var.hostname}"
+  domain_name_label            = "${var.hostname}${random_integer.random_int.result}"
 
   tags {
     environment = "Bootcamp"
