@@ -1,13 +1,13 @@
-variable "client_id" {
-  default = ""
+variable "arm_client_id" {
+  description = "Service Principal client ID" 
 }
-variable "client_secret" {
-  default = ""
+variable "arm_client_secret" {
+  description = "Service Principal Secret"
 }
 
 variable "resource_group" {
   description = "The name of the resource group in which to create the virtual network."
-  default = "k8s-mylab"
+  default = "k8smylab"
 }
 
 variable "rg_prefix" {
@@ -48,6 +48,6 @@ variable "ssh_public_data" {
 
 variable "location" {
   description = "The location/region where the virtual network is created. Changing this forces a new resource to be created."
-  default     = "centralus"
+  default     = "eastus"
 }
 

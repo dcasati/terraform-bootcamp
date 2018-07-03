@@ -48,6 +48,11 @@ export ARM_CLIENT_SECRET=$(echo $CREDENTIALS | jq .password)
 export ARM_TENANT_ID=$(echo $CREDENTIALS | jq .tenant)
 EOF
 
+cat > sp.tfvars << EOF
+arm_client_id=$(echo $CREDENTIALS | jq .appId)
+arm_client_secret=$(echo $CREDENTIALS | jq .password)
+EOF
+
 run source terraform.rc
 
 echo "Here are the Terraform environment variables for your setup"
@@ -55,3 +60,5 @@ echo $LINE
 cat terraform.rc
 echo $LINE
 echo "Setup is done. Your Terraform variables were saved on the terraform.rc file."
+echo $LINE
+echo "The file sp.tfvars contains Service Principal credentials. This can be used at later deployments by passing the `-var-file` flag to `terraform`."

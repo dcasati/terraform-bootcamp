@@ -56,8 +56,8 @@ resource "azurerm_kubernetes_cluster" "rg" {
   }
 
   service_principal {
-    client_id     = "${var.client_id}"
-    client_secret = "${var.client_secret}"
+    client_id     = "${var.arm_client_id}"
+    client_secret = "${var.arm_client_secret}"
   }
 
   tags {
