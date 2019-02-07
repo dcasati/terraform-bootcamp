@@ -1,0 +1,54 @@
+{
+  "variables": {
+    "client_id": "{{env `ARM_CLIENT_ID`}}",
+    "client_secret": "{{env `ARM_CLIENT_SECRET`}}", 
+    "subscription_id": "{{env `ARM_SUBSCRIPTION_ID`}}",
+    "tenant_id": "{{env `ARM_TENANT_ID`}}"
+  },
+  "builders": [{
+    "type": "azure-arm",
+
+    "client_id": "{{user `client_id`}}",
+    "client_secret": "{{user `client_secret`}}",
+    "subscription_id": "{{user `subscription_id`}}",
+    "tenant_id": "{{user `tenant_id`}}",
+
+    "managed_image_resource_group_name": "DevOps-Labs",
+    "managed_image_name": "Windows-DevOps-Base",
+
+    "os_type": "Windows",
+    "image_publisher": "MicrosoftWindowsDesktop",
+    "image_offer": "Windows-10",
+    "image_sku": "rs5-pro",
+
+    "communicator": "winrm",
+    "winrm_use_ssl": true,
+    "winrm_insecure": true,
+    "winrm_timeout": "3m",
+    "winrm_username": "packer",
+
+    "azure_tags": {
+        "dept": "Development",
+        "task": "Image deployment"
+    },
+
+    "location": "East US",
+    "vm_size": "Standard_DS2_v2"
+  }],
+  "provisioners": [
+    {
+      "type": "powershell",
+      "scripts": [
+        "./scripts/Install-Chocolatey.ps1",
+        "./scripts/Install-VisualStudio2017.ps1",
+        "./scripts/Install-SSDT17.ps1"
+      ]
+    },
+    {
+      "type": "powershell",
+      "inline": [
+        "& $env:SystemRoot\\System32\\Sysprep\\Sysprep.exe /oobe /generalize /quiet /quit",
+        "while($true) { $imageState = Get-ItemProperty HKLM:\\SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Setup\\State | Select ImageState; if($imageState.ImageState -ne 'IMAGE_STATE_GENERALIZE_RESEAL_TO_OOBE') { Write-Output $imageState.ImageState; Start-Sleep -s 10  } else { break } }"
+    ]
+  }]
+}
