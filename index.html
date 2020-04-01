@@ -2,9 +2,9 @@
 <html>
   <head>
     <meta charset="utf-8" />
-    <meta name="keywords" content="terraform, devops, azure" />
-    <meta name="description" content="DevOps in Practice: Deploying Infrastructure as Code with Terraform on Azure." />
-    <title>DevOps in Practice: Deploying Infrastructure as Code with Terraform on Azure.</title>
+    <meta name="keywords" content="terraform, azure" />
+    <meta name="description" content="Terraform for the desperate." />
+    <title>Terraform for the desperate.</title>
     <style>
       @import url(https://fonts.googleapis.com/css?family=Droid+Serif);
       @import url(https://fonts.googleapis.com/css?family=Yanone+Kaffeesatz);
@@ -125,11 +125,10 @@ name: inverse
 layout: true
 class: center, middle, inverse
 ---
-#DevOps in Practice: 
-## Deploying Infrastructure as Code with Terraform on Azure
+# Terraform for the desperate 
+## just ask Blake or Adin!
 
-
-[Diego Casati - Senior Software Engineer - Microsoft]
+[Diego Casati - Cloud Solution Architect - Microsoft]
 ---
 layout: false
 .left-column[
@@ -162,87 +161,9 @@ Before we proceed, please do this now:
   
 ]
 ---
-template:inverse
-
-## What is Infrastructure as Code anyway - aka IaC?
----
-layout: false
-.left-column[
-  ## What is it?
-]
-.right-column[
-
-In a nutshell - 
-
-> "This allows a blueprint of your datacenter to be versioned and treated as
-> you would any other code. Additionally, infrastructure can be shared and re-used."
->
-> -- <cite>www.terraform.io/intro</cite>
-
-![Infrastructure as Code](images/iac-book.jpg)
-
-]
----
-.left-column[
-  ## What is it?
-  ## Why use it?
-]
-.right-column[
-
-> "The goal of DevOps is to make software delivery more efficient.""
->
-> -- <cite>Yevgeniy Brikman on Terraform Up and Running</cite>
-
-<br/>
-Infrastructure as Code: 
-
-- **SPEEDS** up the deployment of new infrastructure
-
-- **ALLOWS** you to version control your infrastructure, making it easy to perform roll-backs
-
-- **ENABLES** a repeatable model for deploying your infrastructure, reducing the "fat-finger-effect"
-
-]
----
-.left-column[
-  ## What is it?
-  ## Why use it?
-  ## Trade-offs
-]
-.right-column[
-Using Infrastructure as Code brings some important considerations: 
-
-- How to provide file isolation, file locking and safeguard the state of the infrastructure managed by Terraform? 
-
-- Declarative vs Imperative.
-]
----
-
-.left-column[
-  ## What is it?
-  ## Why use it?
-  ## Trade-offs
-]
-.right-column[
-
-The good: 
-
-  - Its clear, concise, reproducible method are a plus. 
-  
-The bad: 
-
-  - The drawback to have in mind is this: when not careful, a commit can break your entire infrastructure. 
-  
-The ugly: 
-
-  - This could be your production.red[*] and staging environment.
-
-  .footnote[.red[*] Version control and file isolation can mitigate most of these issues.]
-]
----
 template: inverse
 
-## Terraform
+# What is Terraform ?
 ---
 name: how
 
@@ -250,19 +171,9 @@ name: how
   ## What is Terraform ?
 ]
 .right-column[
-Terraform is a tool for building, changing, and versioning infrastructure safely and efficiently. Terraform can manage existing and popular 
-service providers as well as custom in-house solutions.
-
-Configuration files describe to Terraform the components needed to run a single application or your entire datacenter. 
-Terraform generates an execution plan describing what it will do to reach the desired state, and then executes it to build the 
-described infrastructure. As the configuration changes, Terraform is able to determine what changed and create incremental execution 
-plans which can be applied.
-
-The infrastructure Terraform can manage includes low-level components such as compute instances, storage, and networking, as well 
-as high-level components such as DNS entries, SaaS features, etc.
-
-
-More on the [Terraform website](http://www.terraform.io).
+## Terraform is a **tool for building, changing, and versioning infrastructure** safely and efficiently. 
+## Terraform can manage existing and .red[popular service providers] as well as custom in-house solutions.
+## Terraform .red[is not a write once, deploy to many] solution. You will need to **rewrite** your templates.
 ]
 ---
 .left-column[
@@ -587,7 +498,7 @@ template: inverse
 # Next: Let's create something more interesting
 ---
 .left-column[
-  ## Bootcamp infra
+  ## Basic Example
 ]
 .right-column[
 
@@ -595,7 +506,7 @@ template: inverse
 ]
 ---
 .left-column[
-  ## Bootcamp infra
+  ## Basic Example
   ### - Core files
 ]
 .right-column[
@@ -625,7 +536,7 @@ apt-get install cowsay && cowsay "Howdy Azure Bootcamp!" > /tmp/cowsay.txt
 ]
 ---
 .left-column[
-  ## Bootcamp infra
+  ## Basic Example
   ### - Core files
   ### - Default values
 ]
@@ -646,7 +557,7 @@ The following table shows our default values:
 ]
 ---
 .left-column[
-  ## Bootcamp infra
+  ## Basic Example
   ### - Core files
   ### - Default values
 ]
@@ -668,14 +579,14 @@ The following table shows our default values:
 
 ---
 .left-column[
-  ## Bootcamp infra
+  ## Basic Example
   ### - Core files
   ### - Default values
   ### - Show time!
 ]
 .right-column[
 
-## Deploying the bootcamp VM
+## Deploying the VM
 
 1. `terraform init`
 1. `terraform plan -var-file=common.tfvars -out bootcamp-infra`
@@ -711,11 +622,12 @@ template: inverse
 ]
 .right-column[
 
+- Terraform on Azure documentation [https://docs.microsoft.com/en-us/azure/terraform/](https://docs.microsoft.com/en-us/azure/terraform/)
 - Terraform Examples on Azure [https://github.com/hashicorp/terraform/tree/master/examples](https://github.com/hashicorp/terraform/tree/master/examples)
 
 - Terraform Resources on Azure: [https://www.terraform.io/docs/providers/azurerm/index.html](https://www.terraform.io/docs/providers/azurerm/index.html)
 
-- Terraform Up and Running - Awesome book on Terraform !
+- Terraform Up and Running 2nd Edition - Awesome book on Terraform ! 
 
 ]
 ---
